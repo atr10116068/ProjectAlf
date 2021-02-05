@@ -10,8 +10,8 @@ from userbot import BOTLOG, BOTLOG_CHATID, CMD_HELP
 from userbot.events import register
 
 
-@register(outgoing=True, pattern=r"^\.tsblist$")
-async def tsb_active(svd):
+@register(outgoing=True, pattern=r"^\.notes$")
+async def notes_active(svd):
     try:
         from userbot.modules.sql_helper.notes_sql import get_notes
     except AttributeError:
@@ -25,8 +25,8 @@ async def tsb_active(svd):
     await svd.edit(message)
 
 
-@register(outgoing=True, pattern=r"^\.rm tsb (\w*)")
-async def remove_tsb(clr):
+@register(outgoing=True, pattern=r"^\.clear (\w*)")
+async def remove_notes(clr):
     try:
         from userbot.modules.sql_helper.notes_sql import rm_note
     except AttributeError:
@@ -38,7 +38,7 @@ async def remove_tsb(clr):
         return await clr.edit("`Successfully deleted note:` **{}**".format(notename))
 
 
-@register(outgoing=True, pattern=r"^\.tsb (\w*)")
+@register(outgoing=True, pattern=r"^\.save (\w*)")
 async def add_note(fltr):
     try:
         from userbot.modules.sql_helper.notes_sql import add_note
@@ -103,6 +103,29 @@ async def incom_note(getnt):
                     )
     except AttributeError:
         pass
+
+
+@register(outgoing=True, pattern=r"^\.rmbotnotes (.*)")
+async def kick_marie_notes(kick):
+    bot_type = kick.pattern_match.group(1).lower()
+    if bot_type not in ["marie", "rose"]:
+        return await kick.edit("`That bot is not yet supported!`")
+    await kick.edit("```Will be kicking away all Notes!```")
+    await sleep(3)
+    resp = await kick.get_reply_message()
+    filters = resp.text.split("-")[1:]
+    for i in filters:
+        if bot_type == "marie":
+            await kick.reply("/clear %s" % (i.strip()))
+        if bot_type == "rose":
+            i = i.replace("`", "")
+            await kick.reply("/clear %s" % (i.strip()))
+        await sleep(0.3)
+    await kick.respond("```Successfully purged bots notes yaay!```\n Gimme cookies!")
+    if BOTLOG:
+        await kick.client.send_message(
+            BOTLOG_CHATID, "I cleaned all Notes at " + str(kick.chat_id)
+        )
 
 
 CMD_HELP.update(
